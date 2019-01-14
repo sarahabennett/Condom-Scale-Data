@@ -4,26 +4,22 @@ title: "Condom_GRPA_merged_data"
 output: html_document
 ---
 
-Cleaning data
 ```{r}
 #gpra baseline data, renaming ID 
-grpa=read.csv("CCPE_GRPA_Baseline_Condom.csv", header=TRUE, na.strings=c(98))
+grpa=read.csv("CCPE_GRPA_Baseline_Condom.csv", header=TRUE, na.strings=c(98,-88,-99))
 grpa_short=data.frame(PARTID=grpa$PARTID, R_BLACK_N=grpa$R_BLACK_N, R_WHITE_N=grpa$R_WHITE_N, GENDER=grpa$GENDER, SEX_PR=grpa$SEX_PR, YOB=grpa$YOB)
 dim(grpa_short)
 names(grpa_short)
 
 
 #condom scale baseline data, renaming ID
-condom=read.csv("Condom Scale - Baseline.csv", header=TRUE, na.strings=c(98))
+condom=read.csv("Condom Scale - Baseline.csv", header=TRUE, na.strings=c(98,-88,-99))
 dim(condom)
 names(condom)[1]= "PARTID"
 names(condom)
 
 
 #merging both datasets 
-install.packages("prettyR")
-library(prettyR)
-describe.factor(grpa_short$SEX_PR)
 condom_grpa=merge(condom,grpa_short, by="PARTID", all.x=TRUE)
 dim(condom_grpa)
 names(condom_grpa)
@@ -33,7 +29,7 @@ head(condom_grpa)
 Redcap data
 ```{r}
 #Loading redcap data
-grpa_redcap = read.csv("CCPE_RedCap_GRPA_Condom_Data.csv", header = TRUE, na.strings=c(98))
+grpa_redcap = read.csv("CCPE_RedCap_GRPA_Condom_Data.csv", header = TRUE, na.strings=c(98,-88,-99))
 names(grpa_redcap)[1:211]<- toupper(names(grpa_redcap)[1:211])
 
 #creating new data frame with appropriate variables 
@@ -48,25 +44,28 @@ head(binded_data)
 dim(binded_data)
 names(binded_data)
 
-write.csv(binded_data, file="binded_data.csv")
-
 colnames(binded_data)[colnames(binded_data)=="YOB"] <- "Age"
 binded_data$Age=2019-binded_data$Age
-Age
 names(binded_data)
 head(binded_data)
 
 #gender: there are 2 four's, meaning 2 people responded saying they are unsure of their gender
-
-library(prettyR)
-describe.factor
 ```
 Next steps
 Make YOB of their age
 Check for errors: can use describe, summary
 ```{r}
-library(psych)
+binded_data_error = subset(binded_data, EffectivePreventSTD > 7) 
+binded_data_error
+#participant ID #1767 invalid response for EffectivePrevent STD --> answer of 33 
+#find out where their data is living/where the hard copy of the data is 
+binded_data_error1=subset(binded_data, ConvenientToUse > 7) 
+binded_data_error1
+#participant ID #1671 invalid response for ConvenientToUse --> answer of 22 
+summary(binded_data)
+
 ```
+
 
 
 
