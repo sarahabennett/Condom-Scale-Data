@@ -89,3 +89,127 @@ binded_data =  cbind(binded_data, Total_score)
 range(binded_data$Age, na.rm = TRUE)
 
 ```
+Reiability 
+```{r}
+omegaItems = na.omit((binded_data[,7:19]))
+dim(omegaItems)
+head(binded_data)
+omegaResults = omega(omegaItems)
+summary(omegaResults)
+```
+Splitting Data
+```{r}
+inTrain = createDataPartition(omegaItems$PreventPregnancy, p = .50, list = FALSE)
+efaData = omegaItems[inTrain,]
+cfaData = omegaItems[-inTrain,]
+
+```
+EFA
+```{r}
+efa1 = fa(r = efaData, nfactors = 1, fm = "gls", cor = "poly")
+
+efa2 = fa(r = efaData, nfactors = 2, fm = "gls", cor = "poly")
+fa.diagram(efa2)
+
+efa3 = fa(r = efaData, nfactors = 3, fm = "gls", cor = "poly")
+fa.diagram(efa3)
+summary(efa3)
+
+anova(efa1, efa2)
+anova(efa1, efa3)
+anova(efa2, efa3)
+```
+VSS
+```{r}
+vss(efaData, n = 3, rotate = "oblimin", fm = "mle", cor = "poly")
+```
+paran
+```{r}
+paran(efaData, centile = 95, iterations = 1000, graph = TRUE, cfa = TRUE)
+
+```
+
+
+
+
+CFA
+```{r}
+library(lavaan)
+model1 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull + NeatMessy
+          M =~ ConvenientToUse + EasyHardToUse + Embarrassing + DiscussWithPartner + Obtain'
+
+fit1 = cfa(model1, estimator  = "MLR", missing = "ML", data = binded_data)
+summary(fit1, fit.measures = TRUE, standardized = TRUE)
+
+head(binded_data)
+
+
+model2 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV + Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull + NeatMessy + ConvenientToUse + EasyHardToUse + Embarrassing + DiscussWithPartner + Obtain'
+
+fit2 = cfa(model2, estimator  = "MLR", missing = "ML", data = binded_data)
+summary(fit2, fit.measures = TRUE, standardized = TRUE)
+
+### CFA 
+
+model3 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull  +ConvenientToUse
+          M =~ EasyHardToUse + Embarrassing + DiscussWithPartner + Obtain'
+
+fit3 = cfa(model3, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit3, fit.measures = TRUE, standardized = TRUE)
+
+head(binded_data)
+
+
+
+model4 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull 
+          M =~ EasyHardToUse + Embarrassing + DiscussWithPartner + Obtain + ConvenientToUse'
+
+fit4 = cfa(model4, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit4, fit.measures = TRUE, standardized = TRUE)
+
+
+
+model5 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull  +ConvenientToUse
+          M =~ EasyHardToUse + Embarrassing + DiscussWithPartner'
+
+fit5 = cfa(model5, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit5, fit.measures = TRUE, standardized = TRUE)
+
+
+model6 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull
+          M =~ EasyHardToUse + Embarrassing + DiscussWithPartner + ConvenientToUse'
+
+fit6 = cfa(model6, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit6, fit.measures = TRUE, standardized = TRUE)
+
+
+model7 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+          A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull
+          M =~ EasyHardToUse + Embarrassing + DiscussWithPartner + ConvenientToUse
+          PE ~~ M                                                                        
+          '
+
+fit7 = cfa(model7, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit7, fit.measures = TRUE, standardized = TRUE)
+
+
+```
+Final Model
+```{r}
+model5 = 'PE =~ PreventPregnancy + EffectivePreventSTD + EffectivePreventHIV
+A =~ Comfortable+ SexualPleasure + Freinds + SexualPartner + ExcitingDull +ConvenientToUse
+M =~ EasyHardToUse + Embarrassing + DiscussWithPartner'
+
+
+
+fit5 = cfa(model5, estimator  = "MLR", missing = "ML", data = cfaData)
+summary(fit5, fit.measures = TRUE, standardized = TRUE)
+```
+
+
+
